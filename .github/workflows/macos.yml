@@ -14,6 +14,10 @@ jobs:
       matrix:
         build-type: [Debug, Release]
 
+    defaults:
+      run:
+        working-directory: mimir
+
     steps:
       - name: Clone recursively
         uses: actions/checkout@v4
@@ -59,7 +63,7 @@ jobs:
                 -DMIM_TEST_ROUNDTRIP=${{matrix.build-type == 'Release' && 'ON' || 'OFF'}} \
                 -DMIM_FILECHECK=${LLVM_PREFIX}/bin/FileCheck                \
                 -DMIM_LIT_TIMEOUT=300                                       \
-                -DPython3_EXECUTABLE=mimir/.venv/bin/python3
+                -DPython3_EXECUTABLE=${{github.workspace}}/mimir/.venv/bin/python3
 
       - name: Build
         run: cmake --build build -v

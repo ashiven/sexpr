@@ -35,6 +35,10 @@ jobs:
       ASAN_OPTIONS: "halt_on_error=1:abort_on_error=1:exitcode=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_leaks=1"
       UBSAN_OPTIONS: "halt_on_error=1:print_stacktrace=1:report_error_type=1"
 
+    defaults:
+      run:
+        working-directory: mimir
+
     steps:
       - name: Clone recursively
         uses: actions/checkout@v4
