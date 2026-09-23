@@ -1,0 +1,23 @@
+/// # The sexpr Plugin {#sexpr}
+///
+/// @see mim::plug::sexpr
+///
+/// [TOC]
+///
+/// A backend that emits the program as symbolic expression, e.g. for equality saturation with [egg](https://egraphs-good.github.io/) or [slotted-egraphs](https://github.com/memoryleak47/slotted-egraphs).
+/// Loading this plugin (`mim foo.mim -p sexpr`) appends an emission phase to the compilation pipeline that writes the fully lowered program to `<world>.sexpr` (or `a.sexpr` if the world is unnamed).
+/// The output path can be overridden via `-X sexpr:o=<file>`; `-X sexpr:slotted` and `-X sexpr:types` select the format.
+///
+/// ## Dependencies
+///
+plugin opt;
+import compile;
+///
+/// ## Phases
+///
+/// ### emit
+///
+/// Emits the symbolic expression of the current world.
+/// This phase is spliced into the default pipeline (see `opt`) whenever the `sexpr` plugin is loaded.
+///
+axm emit: compile.Phase;

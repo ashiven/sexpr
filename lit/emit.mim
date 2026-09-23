@@ -1,0 +1,11 @@
+// RUN: %mim %s -p sexpr -X sexpr:o=- | %FileCheck %s
+// RUN: %mim %s -p sexpr -X sexpr:types -X sexpr:slotted -X sexpr:o=- | %FileCheck %s --check-prefix=SLOTTED
+
+extern fun f (x: Nat): Nat = return x;
+
+// CHECK: (root extern f
+// CHECK-NEXT: (fun
+
+// SLOTTED: (root extern f
+// SLOTTED-NEXT: (@
+// SLOTTED: (var $

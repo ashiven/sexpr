@@ -1,0 +1,68 @@
+name: macos
+
+on:
+  push:
+  pull_request:
+    branches: [master]
+
+jobs:
+  build-and-test:
+    name: Build and test ${{matrix.build-type}}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build-type: [Debug, Release]
+
+    steps:
+      - name: Clone recursively
+        uses: actions/checkout@v4
+        with:
+          repository: mimir/mimir
+          path: mimir
+          submodules: recursive
+
+      - name: Clone sexpr plugin
+        uses: actions/checkout@v4
+        with:
+          path: mimir/extra/sexpr
+
+      - name: Install dependencies
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install lit psutil
+          brew install llvm
+          LLVM_PREFIX=$(brew --prefix llvm)
+          echo "LLVM_PREFIX=${LLVM_PREFIX}" >> $GITHUB_ENV
+          echo "${LLVM_PREFIX}/bin" >> $GITHUB_PATH
+
+      # The action hooks the compiler by prepending its symlink dir (cc, c++, clang, ...) to PATH,
+      # but Configure below passes *absolute* paths into ${LLVM_PREFIX}/bin, which sidesteps those
+      # symlinks: ccache saw 2 calls and a 40 KB cache, i.e. every build here -- abseil included --
+      # was compiled from scratch. CMAKE_{C,CXX}_COMPILER_LAUNCHER hooks it however it is spelled.
+      - name: Setup ccache
+        uses: Chocobo1/setup-ccache-action@v1
+        with:
+          ccache_options: max_size=2G
+          override_cache_key: ${{runner.os}}-ccache-${{matrix.build-type}}
+
+      - name: Configure
+        run: |
+          CC="${LLVM_PREFIX}/bin/clang" CXX="${LLVM_PREFIX}/bin/clang++"    \
+          cmake -B build                                                    \
+                -G Ninja                                                    \
+                -DCMAKE_BUILD_TYPE=${{matrix.build-type}}                   \
+                -DCMAKE_C_COMPILER_LAUNCHER=ccache                          \
+                -DCMAKE_CXX_COMPILER_LAUNCHER=ccache                        \
+                -DBUILD_TESTING=ON                                          \
+                -DMIM_BUILD_EXAMPLES=ON                                     \
+                -DMIM_TEST_ROUNDTRIP=${{matrix.build-type == 'Release' && 'ON' || 'OFF'}} \
+                -DMIM_FILECHECK=${LLVM_PREFIX}/bin/FileCheck                \
+                -DMIM_LIT_TIMEOUT=300                                       \
+                -DPython3_EXECUTABLE=mimir/.venv/bin/python3
+
+      - name: Build
+        run: cmake --build build -v
+
+      - name: Test
+        run: cmake --build build -v --target test-all
