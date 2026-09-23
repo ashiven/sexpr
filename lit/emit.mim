@@ -1,5 +1,10 @@
-// RUN: %mim %s -p sexpr -X sexpr:o=- | %FileCheck %s
-// RUN: %mim %s -p sexpr -X sexpr:types -X sexpr:slotted -X sexpr:o=- | %FileCheck %s --check-prefix=SLOTTED
+// RUN: %mim %s -X sexpr:o=- | %FileCheck %s
+// RUN: %mim %s -X sexpr:types -X sexpr:slotted -X sexpr:o=- | %FileCheck %s --check-prefix=SLOTTED
+
+import compile;
+plugin sexpr;
+
+extern lam _compile (): compile.Phase = sexpr.emit;
 
 extern fun f (x: Nat): Nat = return x;
 
