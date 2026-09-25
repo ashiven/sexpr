@@ -825,7 +825,6 @@ std::string Emitter::emit_node(BB& bb, const Def* def, std::string node_name, bo
             std::string var_val = slotted() ? " $dummy (scope" : " dummy";
             op_vals.push_back(var_val);
         }
-        if (auto arity_val = emit_bb(bb, *pack->shape()); !arity_val.empty()) op_vals.push_back(arity_val);
     }
 
     if (auto proxy = def->isa<Proxy>()) {
