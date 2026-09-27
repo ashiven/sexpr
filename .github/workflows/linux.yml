@@ -8,7 +8,7 @@ on:
 jobs:
   build-and-test:
     name: Build and test ${{matrix.build-type}}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
@@ -26,9 +26,9 @@ jobs:
               -DMIM_TEST_ROUNDTRIP=OFF
               -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined,leak,bounds -fsanitize-address-use-after-scope -fno-omit-frame-pointer -fno-sanitize=vptr"
           - build-type: Release
-            cc: gcc-14
-            cxx: g++-14
-            packages: g++-14 valgrind
+            cc: gcc-15
+            cxx: g++-15
+            packages: g++-15 valgrind
             test-target: lit test-roundtrip
             cmake-args: -DMIM_LIT_WITH_VALGRIND=ON
     env:
@@ -55,7 +55,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y llvm-20-tools ${{matrix.packages}}
+          sudo apt-get install -y clang llvm-20-tools ninja-build ${{matrix.packages}}
           sudo pip install lit psutil
 
       # ccache hooks the compiler through its /usr/lib/ccache/<name> symlinks, which the action

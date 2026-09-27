@@ -5,7 +5,7 @@
 #include <regex>
 #include <sstream>
 
-#include <absl/container/flat_hash_set.h>
+#include <ankerl/unordered_dense.h>
 #include <fe/term.h>
 
 #include <mim/phase.h>
@@ -98,7 +98,7 @@ struct BB {
     void assign(std::string name) { assigned.insert(name); }
 
     std::array<std::deque<std::ostringstream>, 3> parts;
-    absl::flat_hash_set<std::string> assigned;
+    ankerl::unordered_dense::set<std::string> assigned;
 };
 
 class Emitter : public NestPhase<Lam> {
@@ -192,7 +192,7 @@ private:
 
     // Ensures that we don't redeclare things, for example axm.foo
     // should only be declared once.
-    absl::flat_hash_set<std::string> declared_;
+    ankerl::unordered_dense::set<std::string> declared_;
     bool is_declared(std::string name) { return declared_.contains(name); }
 
     std::ostringstream decls_;
